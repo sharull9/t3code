@@ -220,6 +220,32 @@ describe("sidebar collision detection", () => {
 });
 
 describe("sidebar drag projection", () => {
+  it("opens the For later placeholder when its last row is dragged out", () => {
+    const items = [
+      pinnedHeader,
+      divider,
+      marker("active-placeholder"),
+      thread("a", "active"),
+      marker("later-header"),
+      marker("later-placeholder"),
+      thread("l", "later"),
+      settledHeader,
+      marker("settled-placeholder"),
+    ];
+    const result = preview(
+      { items, settledOrder: [], settledExpanded: false, laterExpanded: true },
+      "l",
+      "a",
+    );
+    expect(result.get(sidebarMarkerId("later-placeholder"))?.scaleY).toBe(1);
+    expect(result.get(sidebarMarkerId("later-header"))?.scaleY).toBe(1);
+    const incoming = preview(
+      { items, settledOrder: [], settledExpanded: false, laterExpanded: false },
+      "a",
+      "l",
+    );
+    expect(incoming.get(sidebarMarkerId("later-placeholder"))?.scaleY).toBe(1);
+  });
   it.each([
     ["a2", "a1"],
     ["p", "a1"],

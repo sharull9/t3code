@@ -1088,6 +1088,45 @@ describe("Working shelf (beta)", () => {
       expect(resolveSidebarDropVerb("active", "working")).toBeNull();
     });
 
+    it("parks any thread in For later and permits dragging it back to Active", () => {
+      const withLater = [
+        ...items,
+        marker("later-header"),
+        marker("later-placeholder"),
+        row("l1", "later"),
+      ];
+      const target = resolveSidebarDropTarget(withLater, "w1", "l1");
+      expect(target?.section).toBe("later");
+      expect(
+        planSidebarThreadDrop({
+          activeKey: "w1",
+          activeSection: "working",
+          target: target!,
+          pinnedOrder: [],
+          pinnedKeysById: new Map(),
+          activeOrder: [],
+          activeKeysById: new Map(),
+        }),
+      ).toEqual({ kind: "move-later" });
+      const back = resolveSidebarDropTarget(withLater, "l1", "a1");
+      expect(back?.section).toBe("active");
+      expect(
+        planSidebarThreadDrop({
+          activeKey: "l1",
+          activeSection: "later",
+          activeSnoozed: true,
+          target: back!,
+          pinnedOrder: [],
+          pinnedKeysById: new Map(),
+          activeOrder: ["a1", "a2"],
+          activeKeysById: new Map(),
+          activeTimeOrdered: true,
+        }),
+      ).toMatchObject({ kind: "move-active", unsnooze: true });
+      expect(resolveSidebarDropVerb("active", "later")).toBe("later");
+      expect(resolveSidebarDropVerb("later", "active")).toBe("restore");
+    });
+
     it.each([
       ["pinned", "p1"],
       ["active", "a2"],
