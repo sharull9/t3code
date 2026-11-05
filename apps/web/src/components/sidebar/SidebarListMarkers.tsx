@@ -9,6 +9,7 @@ import {
   type SidebarListMarker,
 } from "../Sidebar.logic";
 import { SIDEBAR_SORTABLE_DRAG_DISABLED } from "./SidebarThreadRow";
+import { SIDEBAR_PROJECT_DRAG_TYPE } from "../Sidebar.later";
 
 function SortableSidebarMarker(props: {
   marker: SidebarListMarker;
@@ -16,6 +17,7 @@ function SortableSidebarMarker(props: {
   children?: ReactNode;
   revealOverflow?: boolean;
   "data-testid"?: string;
+  onProjectDrop?: ((key: string) => void) | undefined;
 }) {
   const { node, setNodeRef, transform, transition } = useSortable({
     id: sidebarMarkerId(props.marker),
@@ -34,6 +36,27 @@ function SortableSidebarMarker(props: {
       data-thread-selection-safe
       data-testid={props["data-testid"]}
       className={cn("list-none", props.className)}
+      onDragOver={
+        props.onProjectDrop
+          ? (event) => {
+              if (event.dataTransfer.types.includes(SIDEBAR_PROJECT_DRAG_TYPE)) {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+              }
+            }
+          : undefined
+      }
+      onDrop={
+        props.onProjectDrop
+          ? (event) => {
+              const key = event.dataTransfer.getData(SIDEBAR_PROJECT_DRAG_TYPE);
+              if (!key) return;
+              event.preventDefault();
+              event.stopPropagation();
+              props.onProjectDrop?.(key);
+            }
+          : undefined
+      }
       style={{
         transform: CSS.Translate.toString(transform),
         transition: props.marker.endsWith("-placeholder") ? "none" : transition,
@@ -46,7 +69,7 @@ function SortableSidebarMarker(props: {
 }
 
 export function SidebarSectionPlaceholder(props: {
-  marker: "active-placeholder" | "settled-placeholder";
+  marker: "active-placeholder" | "later-placeholder" | "settled-placeholder";
   label: string;
   showHint: boolean;
   isDropTarget: boolean;
@@ -56,7 +79,10 @@ export function SidebarSectionPlaceholder(props: {
       marker={props.marker}
       data-testid={`sidebar-${props.marker}`}
       className="relative mx-0.5 -mb-px h-0"
-      revealOverflow={props.marker === "settled-placeholder" && props.showHint}
+      revealOverflow={
+        (props.marker === "settled-placeholder" || props.marker === "later-placeholder") &&
+        props.showHint
+      }
     >
       {props.showHint ? (
         <div
@@ -108,7 +134,7 @@ export function SidebarDragBoundary(props: {
 }
 
 export function SidebarSectionHeader(props: {
-  marker: "working-header" | "snoozed-header" | "settled-header";
+  marker: "working-header" | "snoozed-header" | "later-header" | "settled-header";
   label: string;
   /** A muted trailing count. */
   count: number;
@@ -116,18 +142,22 @@ export function SidebarSectionHeader(props: {
   dragging?: boolean;
   isDropTarget?: boolean;
   toggle: { expanded: boolean; onToggle: () => void };
+  onProjectDrop?: (key: string) => void;
 }) {
   const shelf =
     props.marker === "working-header"
       ? "working"
       : props.marker === "snoozed-header"
         ? "snoozed"
-        : "settled";
+        : props.marker === "later-header"
+          ? "later"
+          : "settled";
   return (
     <SortableSidebarMarker
       marker={props.marker}
       data-testid={`sidebar-${props.marker}`}
       className={cn("relative mx-0.5 h-8", props.className)}
+      onProjectDrop={props.onProjectDrop}
     >
       <CollapsibleSectionHeader
         data-sidebar-row={`shelf:${shelf}`}

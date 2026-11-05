@@ -10,6 +10,7 @@ import { resolveSidebarFolderDot, resolveThreadLastVisitedAt } from "../Sidebar.
 import { ProjectFavicon } from "../ProjectFavicon";
 import { Button } from "../ui/button";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
+import { SIDEBAR_PROJECT_DRAG_TYPE } from "../Sidebar.later";
 
 const FOLDER_DOT_CLASS_NAME = {
   attention: "bg-warning",
@@ -42,6 +43,7 @@ export const SidebarProjectFolderHeader = memo(function SidebarProjectFolderHead
   onToggle: (group: SidebarProjectSnapshot) => void;
   onNewThread: (group: SidebarProjectSnapshot) => void;
   onContextMenu: (group: SidebarProjectSnapshot, position: { x: number; y: number }) => void;
+  navigationParent?: string;
 }) {
   const { group, collapsed, hiddenThreads } = props;
   const rowId = sidebarFolderRowId(group.projectKey);
@@ -67,6 +69,12 @@ export const SidebarProjectFolderHeader = memo(function SidebarProjectFolderHead
       <button
         type="button"
         data-sidebar-row={rowId}
+        data-sidebar-parent={props.navigationParent}
+        draggable
+        onDragStart={(event) => {
+          event.dataTransfer.setData(SIDEBAR_PROJECT_DRAG_TYPE, group.projectKey);
+          event.dataTransfer.effectAllowed = "move";
+        }}
         aria-expanded={!collapsed}
         onClick={() => props.onToggle(group)}
         onContextMenu={(event) => {
