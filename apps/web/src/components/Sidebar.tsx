@@ -2350,6 +2350,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
             },
           ],
           position,
+          { inApp: true },
         ),
       );
       if (clicked._tag === "Failure" || clicked.value === null) return;
@@ -2532,6 +2533,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
               hasProject: projectGroup != null,
             }),
             position,
+            { inApp: true },
           ),
         );
         if (clicked._tag === "Failure") return;
@@ -2635,6 +2637,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
               snoozePresets,
             }),
             position,
+            { inApp: true },
           ),
         );
         if (clicked._tag === "Failure" || clicked.value === null) return;

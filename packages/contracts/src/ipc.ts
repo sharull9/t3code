@@ -1234,6 +1234,7 @@ export interface LocalApi {
     show: <T extends string>(
       items: readonly ContextMenuItem<T>[],
       position?: { x: number; y: number },
+      options?: { readonly inApp?: boolean },
     ) => Promise<T | null>;
     close: () => Promise<void>;
   };
