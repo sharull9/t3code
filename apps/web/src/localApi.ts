@@ -43,17 +43,16 @@ export function createLocalApi(): LocalApi {
       show: async <T extends string>(
         items: readonly ContextMenuItem<T>[],
         position?: { x: number; y: number },
+        options?: { readonly inApp?: boolean },
       ): Promise<T | null> => {
-        if (window.desktopBridge) {
+        if (window.desktopBridge && !options?.inApp) {
           return window.desktopBridge.showContextMenu(items, position) as Promise<T | null>;
         }
         return showContextMenuFallback(items, position);
       },
-      // Unlike native menus, the DOM fallback needs dismissal when underlying state disappears.
+      // Unlike native menus, the DOM menu needs dismissal when underlying state disappears.
       close: async () => {
-        if (!window.desktopBridge) {
-          dismissContextMenu();
-        }
+        dismissContextMenu();
       },
     },
     persistence: {
